@@ -117,7 +117,115 @@ std_max(MAX, [X | Tail]) :-
 
 В моем варианте использовалось представление данных в виде фактов следующей структуры:
 
-```grade(группа, фамилия, предмет, оценка).```
+```
+grade(группа, фамилия, предмет, оценка).
+```
+### Исходный код программы:
+```prolog
+% USE UTF-8
+
+:- set_prolog_flag(encoding, utf8).
+:-['two.pl'].
+
+% 2.1 Напечатать средний балл для каждого предмета.
+
+% Список предметов
+subjects(List) :- setof(Subject, A^B^C^grade(A, B, Subject, C), List).
+
+% Сумма(list, sum_of_elements).
+sum([], 0).
+sum([Head|Tail], Sum) :- sum(Tail, Sum1), Sum is Sum1 + Head.
+
+% Среднее значение(list, average_value_of_elements).
+average(List, Average) :- sum(List, Sum), length(List, Length), Average is Sum / Length.
+
+% Получить средний балл N для предмета S.(subject, average_grade). - 
+get_average_grade(Subject, Number) :- findall(Mark, grade(_, _, Subject, Mark), List), 
+                                      average(List, Number).
+
+% Напечатать средний балл для каждого предмета
+print_average_grades(Subject, Average) :- subjects(Subjects), member(Subject, Subjects), 
+                                          get_average_grade(Subject, Average).
+
+
+
+% 2.2 Для каждой группы, найти количество не сдавших студентов
+
+% Напечатать количество не сдавших студентов для каждой группы
+print_failed_exam(Group, Number) :- setof(Student, A^grade(Group, Student, A, 2), List), 
+                                    length(List, Number).
+
+
+
+% 2.3 Найти количество не сдавших студентов для каждого из предметов
+
+% Поиск количества студентов (N), не сдавших предмет S.
+failed_subject(Subject, Number) :- findall(Student, grade(_, Student, Subject, 2), List), 
+                                   length(List, Number).
+
+% Напечатать список всех предметов и количество несдавших его студентов
+print_failed_subject(Subject, Number) :- subjects(Subjects), member(Subject, Subjects), 
+                                                  failed_subject(Subject, Number).
+```
+### Список реализованных предикатов:
+`subjects(List)` - Список предметов
+`sum([Head|Tail],Sum)` - Сумма(list, sum_of_elements).
+`average(List, Average)` - Среднее значение(list, average_value_of_elements).
+`get_average_grade(Subject,Number)` - Получить средний балл N для предмета S.(subject, average_grade).
+`print_average_grades(Subject,Average)` - Напечатать средний балл для каждого предмета
+`print_failed_exam(Group,Number)` - Напечатать количество не сдавших студентов для каждой группы
+`failed_subject(Subject,Number)` - Поиск количества студентов (N), не сдавших предмет S.
+`print_failed_subject(Subject,Number)` - Напечатать список всех предметов и количество несдавших его студентов
+
+### Результат работы предикатов:
+```
+?- subjects(X).
+X = ['Английский язык', 'Информатика', 'Логическое программирование', 'Математический анализ', 'Психология', 'Функциональное программирование'].
+?- sum([1,2,3], X).
+X = 6.
+?- average([5,3,2], X).
+X = 3.3333333333333335.
+?- get_average_grade('Психология', X).            
+X = 3.9285714285714284.
+?- print_average_grages(Subj,Mark).
+Correct to: "print_average_grades(Subj,Mark)"? yes
+Subj = 'Английский язык',
+Mark = 3.75 ;
+Subj = 'Информатика',
+Mark = 3.9285714285714284 ;
+Subj = 'Логическое программирование',
+Mark = 3.9642857142857144 ;
+Subj = 'Математический анализ',
+Mark = 3.892857142857143 ;
+Subj = 'Психология',
+Mark = 3.9285714285714284 ;
+Subj = 'Функциональное программирование',
+Mark = 3.9642857142857144.
+?- print_failed_exam(X, Y).
+X = 101,
+Y = 2 ;
+X = 102,
+Y = 5 ;
+X = 103,
+Y = 3 ;
+X = 104,
+Y = 2.
+?- failed_subject('Математический анализ', X).
+X = 3.
+?- print_failed_subject(X, Y).
+X = 'Английский язык',
+Y = 4 ;
+X = 'Информатика',
+Y = 2 ;
+X = 'Логическое программирование',
+Y = 2 ;
+X = 'Математический анализ',
+Y = 3 ;
+X = 'Психология',
+Y = 1 ;
+X = 'Функциональное программирование',
+Y = 1.
+```
 ## Выводы
 
 Сформулируйте *содержательные* выводы по лабораторной работе. Чему она вас научила? Над чем заставила задуматься? Помните, что несодержательные выводы -
